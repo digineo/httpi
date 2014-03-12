@@ -129,7 +129,11 @@ module HTTPI
       end
 
       def setup_client
-        @client.use_ssl = @request.ssl?
+        if @request.ssl?
+          @client.use_ssl = @request.ssl?
+          ssl = @request.auth.ssl
+          @client.ssl_version = ssl.ssl_version if ssl.ssl_version
+        end
         @client.open_timeout = @request.open_timeout if @request.open_timeout
         @client.read_timeout = @request.read_timeout if @request.read_timeout
       end
@@ -144,9 +148,6 @@ module HTTPI
         # Send client-side certificate regardless of state of SSL verify mode
         @client.key = ssl.cert_key
         @client.cert = ssl.cert
-
-        @client.verify_mode = ssl.openssl_verify_mode
-        @client.ssl_version = ssl.ssl_version if ssl.ssl_version
       end
 
       def request_client(type)
